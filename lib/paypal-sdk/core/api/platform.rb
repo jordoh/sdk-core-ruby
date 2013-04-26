@@ -49,7 +49,7 @@ module PayPal::SDK::Core
         header   = map_header_value(NVP_AUTH_HEADER, credential_properties).
           merge(DEFAULT_NVP_HTTP_HEADER)
         payload[:header] = header.merge(payload[:header])
-        payload[:body]   = MultiJson.respond_to?(:dump) ? MultiJson.dump(DEFAULT_PARAMS.merge(payload[:params])) : MultiJson.encode(DEFAULT_PARAMS.merge(payload[:params]))
+        payload[:body]   = MultiJson.send(MultiJson.respond_to?(:dump) ? :dump : :encode, DEFAULT_PARAMS.merge(payload[:params]))
         payload
       end
 
@@ -62,7 +62,7 @@ module PayPal::SDK::Core
       def format_response(payload)
         payload[:data] =
           if payload[:response].code == "200"
-            MultiJson.load(payload[:response].body)
+            MultiJson.send(MultiJson.respond_to?(:dump) ? :load : :decode, payload[:response].body)
           else
             format_error(payload[:response], payload[:response].message)
           end
